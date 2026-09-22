@@ -83,17 +83,18 @@ app.post("/chat", (req, res) => {
   const options = {
     hostname: "api.giga.chat",
     port: 443,
-    path: "/api/v1/chat/completions",
+    path: "/v1/chat/completions",
     method: "POST",
 
     rejectUnauthorized: false,
 
-    headers: {
-      "Authorization": "Bearer " + accessToken,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      "Content-Length": Buffer.byteLength(data)
-    }
+headers: {
+  "Authorization": "Bearer " + accessToken,
+  "Content-Type": "application/json",
+  "Accept": "application/json",
+  "User-Agent": "avito-bot",
+  "Content-Length": Buffer.byteLength(data)
+}
   };
 
   const request = https.request(options, (response) => {
