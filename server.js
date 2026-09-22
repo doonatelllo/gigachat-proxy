@@ -60,6 +60,49 @@ app.post("/token", (req, res) => {
   request.end();
 });
 
+app.post("/chat", async (req, res) => {
+  try {
+    const { accessToken, message } = req.body;
+
+    if (!accessToken || !message) {
+      return res.status(400).json({
+        error: "accessToken and message are required"
+      });
+    }
+
+    const response = await fetch(
+      "https://api.giga.chat/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + accessToken,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          model: "GigaChat",
+          messages: [
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          stream: false
+        })
+      }
+    );
+
+    const text = await response.text();
+
+    res.status(response.status).send(text);
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
