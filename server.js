@@ -187,8 +187,18 @@ const request = https.request(options, (response) => {
   });
 
   response.on("end", () => {
-    res.status(response.statusCode).send(body);
+  if (response.statusCode !== 200) {
+    return res.status(response.statusCode).send(body);
+  }
+
+  const fileData = JSON.parse(body);
+  const fileId = fileData.id;
+
+  res.json({
+    success: true,
+    fileId: fileId
   });
+});
 });
 
 request.on("error", (error) => {
