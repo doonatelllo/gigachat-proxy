@@ -195,7 +195,7 @@ const request = https.request(options, (response) => {
 const fileId = fileData.id;
 
 const chatData = JSON.stringify({
-  model: "GigaChat-2",
+  model: "GigaChat-2-Pro",
   messages: [
     {
       role: "user",
