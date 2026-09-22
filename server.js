@@ -146,7 +146,24 @@ app.post("/vision", (req, res) => {
   }
 
   const imageBuffer = Buffer.from(imageBase64, "base64");
+const boundary = "----GigaChatBoundary" + crypto.randomUUID();
 
+const beforeFile =
+  "--" + boundary + "\r\n" +
+  'Content-Disposition: form-data; name="file"; filename="avito.jpg"\r\n' +
+  "Content-Type: image/jpeg\r\n\r\n";
+
+const afterFile =
+  "\r\n--" + boundary + "\r\n" +
+  'Content-Disposition: form-data; name="purpose"\r\n\r\n' +
+  "general\r\n" +
+  "--" + boundary + "--\r\n";
+
+const multipartBody = Buffer.concat([
+  Buffer.from(beforeFile),
+  imageBuffer,
+  Buffer.from(afterFile)
+]);
   res.json({
     success: true,
     message: "Изображение готово к отправке в GigaChat",
