@@ -164,11 +164,41 @@ const multipartBody = Buffer.concat([
   imageBuffer,
   Buffer.from(afterFile)
 ]);
-  res.json({
-    success: true,
-    message: "Изображение готово к отправке в GigaChat",
-    size: imageBuffer.length
+ const options = {
+  hostname: "api.giga.chat",
+  port: 443,
+  path: "/v1/files",
+  method: "POST",
+  rejectUnauthorized: false,
+  headers: {
+    "Authorization": "Bearer " + accessToken,
+    "Content-Type": "multipart/form-data; boundary=" + boundary,
+    "Accept": "application/json",
+    "User-Agent": "avito-bot",
+    "Content-Length": multipartBody.length
+  }
+};
+
+const request = https.request(options, (response) => {
+  let body = "";
+
+  response.on("data", (chunk) => {
+    body += chunk;
   });
+
+  response.on("end", () => {
+    res.status(response.statusCode).send(body);
+  });
+});
+
+request.on("error", (error) => {
+  res.status(500).json({
+    error: error.message
+  });
+});
+
+request.write(multipartBody);
+request.end();
 });
 app.post("/models", (req, res) => {
   const { accessToken } = req.body;
