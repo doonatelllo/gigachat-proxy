@@ -191,13 +191,60 @@ const request = https.request(options, (response) => {
     return res.status(response.statusCode).send(body);
   }
 
-  const fileData = JSON.parse(body);
-  const fileId = fileData.id;
+ const fileData = JSON.parse(body);
+const fileId = fileData.id;
 
-  res.json({
-    success: true,
-    fileId: fileId
+const chatData = JSON.stringify({
+  model: "GigaChat-2",
+  messages: [
+    {
+      role: "user",
+      content:
+        "Посмотри на скриншот статистики Avito. " +
+        "Верни ТОЛЬКО JSON без пояснений в формате: " +
+        '{"views":123,"contacts":45,"orders":6}. ' +
+        "views = просмотры, contacts = контакты, orders = заказы.",
+      attachments: [fileId]
+    }
+  ],
+  stream: false
+});
+
+const chatOptions = {
+  hostname: "api.giga.chat",
+  port: 443,
+  path: "/v1/chat/completions",
+  method: "POST",
+  rejectUnauthorized: false,
+  headers: {
+    "Authorization": "Bearer " + accessToken,
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "User-Agent": "avito-bot",
+    "Content-Length": Buffer.byteLength(chatData)
+  }
+};
+
+const chatRequest = https.request(chatOptions, (chatResponse) => {
+  let chatBody = "";
+
+  chatResponse.on("data", (chunk) => {
+    chatBody += chunk;
   });
+
+  chatResponse.on("end", () => {
+    res.status(chatResponse.statusCode).send(chatBody);
+  });
+});
+
+chatRequest.on("error", (error) => {
+  res.status(500).json({
+    error: error.message
+  });
+});
+
+chatRequest.write(chatData);
+chatRequest.end();
 });
 });
 
