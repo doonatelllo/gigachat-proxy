@@ -108,6 +108,16 @@ headers: {
       res.status(response.statusCode).send(body);
     });
   });
+
+  request.on("error", (error) => {
+    res.status(500).json({
+      error: error.message
+    });
+  });
+
+  request.write(data);
+  request.end();
+});
 app.post("/image-test", (req, res) => {
   const { imageBase64 } = req.body;
 
@@ -123,15 +133,6 @@ app.post("/image-test", (req, res) => {
     success: true,
     size: imageBuffer.length
   });
-});
-  request.on("error", (error) => {
-    res.status(500).json({
-      error: error.message
-    });
-  });
-
-  request.write(data);
-  request.end();
 });
 app.post("/models", (req, res) => {
   const { accessToken } = req.body;
