@@ -117,7 +117,47 @@ app.post("/chat", (req, res) => {
   request.write(data);
   request.end();
 });
+app.post("/models", (req, res) => {
+  const { accessToken } = req.body;
 
+  if (!accessToken) {
+    return res.status(400).json({
+      error: "accessToken is required"
+    });
+  }
+
+  const options = {
+    hostname: "api.giga.chat",
+    port: 443,
+    path: "/api/v1/models",
+    method: "GET",
+    rejectUnauthorized: false,
+    headers: {
+      "Authorization": "Bearer " + accessToken,
+      "Accept": "application/json"
+    }
+  };
+
+  const request = https.request(options, (response) => {
+    let body = "";
+
+    response.on("data", chunk => {
+      body += chunk;
+    });
+
+    response.on("end", () => {
+      res.status(response.statusCode).send(body);
+    });
+  });
+
+  request.on("error", error => {
+    res.status(500).json({
+      error: error.message
+    });
+  });
+
+  request.end();
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
