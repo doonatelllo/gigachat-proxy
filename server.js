@@ -133,10 +133,10 @@ app.post("/models", (req, res) => {
     method: "GET",
     rejectUnauthorized: false,
     headers: {
-      "Authorization": "Bearer " + accessToken,
-      "Accept": "application/json"
-      "User-Agent": "avito-bot",
-    }
+  "Authorization": "Bearer " + accessToken,
+  "Accept": "application/json",
+  "User-Agent": "avito-bot"
+}
   };
 
   const request = https.request(options, (response) => {
