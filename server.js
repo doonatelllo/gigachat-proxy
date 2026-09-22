@@ -129,12 +129,13 @@ app.post("/models", (req, res) => {
   const options = {
     hostname: "api.giga.chat",
     port: 443,
-    path: "/api/v1/models",
+    path: "/v1/models",
     method: "GET",
     rejectUnauthorized: false,
     headers: {
       "Authorization": "Bearer " + accessToken,
       "Accept": "application/json"
+      "User-Agent": "avito-bot",
     }
   };
 
