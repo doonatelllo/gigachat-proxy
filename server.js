@@ -126,6 +126,23 @@ app.post("/image-test", (req, res) => {
     return res.status(400).json({
       error: "imageBase64 is required"
     });
+    app.post("/vision", (req, res) => {
+  const { accessToken, imageBase64 } = req.body;
+
+  if (!accessToken || !imageBase64) {
+    return res.status(400).json({
+      error: "accessToken and imageBase64 are required"
+    });
+  }
+
+  const imageBuffer = Buffer.from(imageBase64, "base64");
+
+  res.json({
+    success: true,
+    message: "Изображение готово к отправке в GigaChat",
+    size: imageBuffer.length
+  });
+});
   }
 
   const imageBuffer = Buffer.from(imageBase64, "base64");
