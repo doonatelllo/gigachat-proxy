@@ -70,7 +70,7 @@ app.post("/chat", (req, res) => {
   }
 
   const data = JSON.stringify({
-    model: "GigaChat",
+   model: "GigaChat-2",
     messages: [
       {
         role: "user",
