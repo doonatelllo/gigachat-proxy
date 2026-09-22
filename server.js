@@ -60,47 +60,62 @@ app.post("/token", (req, res) => {
   request.end();
 });
 
-app.post("/chat", async (req, res) => {
-  try {
-    const { accessToken, message } = req.body;
+app.post("/chat", (req, res) => {
+  const { accessToken, message } = req.body;
 
-    if (!accessToken || !message) {
-      return res.status(400).json({
-        error: "accessToken and message are required"
-      });
-    }
+  if (!accessToken || !message) {
+    return res.status(400).json({
+      error: "accessToken and message are required"
+    });
+  }
 
-    const response = await fetch(
-      "https://api.giga.chat/api/v1/chat/completions",
+  const data = JSON.stringify({
+    model: "GigaChat",
+    messages: [
       {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + accessToken,
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          model: "GigaChat",
-          messages: [
-            {
-              role: "user",
-              content: message
-            }
-          ],
-          stream: false
-        })
+        role: "user",
+        content: message
       }
-    );
+    ],
+    stream: false
+  });
 
-    const text = await response.text();
+  const options = {
+    hostname: "api.giga.chat",
+    port: 443,
+    path: "/api/v1/chat/completions",
+    method: "POST",
 
-    res.status(response.status).send(text);
+    rejectUnauthorized: false,
 
-  } catch (error) {
+    headers: {
+      "Authorization": "Bearer " + accessToken,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Content-Length": Buffer.byteLength(data)
+    }
+  };
+
+  const request = https.request(options, (response) => {
+    let body = "";
+
+    response.on("data", (chunk) => {
+      body += chunk;
+    });
+
+    response.on("end", () => {
+      res.status(response.statusCode).send(body);
+    });
+  });
+
+  request.on("error", (error) => {
     res.status(500).json({
       error: error.message
     });
-  }
+  });
+
+  request.write(data);
+  request.end();
 });
 
 const PORT = process.env.PORT || 3000;
