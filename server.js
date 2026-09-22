@@ -108,7 +108,22 @@ headers: {
       res.status(response.statusCode).send(body);
     });
   });
+app.post("/image-test", (req, res) => {
+  const { imageBase64 } = req.body;
 
+  if (!imageBase64) {
+    return res.status(400).json({
+      error: "imageBase64 is required"
+    });
+  }
+
+  const imageBuffer = Buffer.from(imageBase64, "base64");
+
+  res.json({
+    success: true,
+    size: imageBuffer.length
+  });
+});
   request.on("error", (error) => {
     res.status(500).json({
       error: error.message
