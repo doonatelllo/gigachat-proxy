@@ -137,7 +137,7 @@ app.post("/image-test", (req, res) => {
   });
 });
 app.post("/vision", (req, res) => {
-  const { accessToken, imageBase64 } = req.body;
+  const { accessToken, imageBase64, mode = "stats" } = req.body;
 
   if (!accessToken || !imageBase64) {
     return res.status(400).json({
@@ -193,21 +193,41 @@ const request = https.request(options, (response) => {
 
  const fileData = JSON.parse(body);
 const fileId = fileData.id;
-
+const prompt =
+  mode === "brands"
+    ? (
+        "Посмотри на скриншот Avito, раздел «По объявлениям». " +
+        "Возьми сверху вниз максимум первые 5 видимых объявлений. " +
+        "Если видно только 3 или 4 объявления — верни только их. " +
+        "Для каждого объявления прочитай название и количество просмотров справа. " +
+        "По названию объявления определи бренд, персонажа, франшизу или явно указанную марку товара. " +
+        "Например: Beavis / Beavis and Butt-Head = Beavis and Butt-Head; " +
+        "Spider-Man / Spiderman = Marvel; " +
+        "Chrome Hearts = Chrome Hearts; " +
+        "Enfants Riches Deprimes = Enfants Riches Déprimés. " +
+        "Если бренд или франшизу нельзя уверенно определить по видимому названию, напиши «Не определён». " +
+        "Не придумывай бренд. " +
+        "Не используй общее число просмотров сверху страницы — нужны просмотры каждого отдельного объявления справа. " +
+        "Верни ТОЛЬКО JSON без markdown и пояснений. " +
+        "Формат: " +
+        '{"items":[{"title":"название объявления","brand":"бренд","views":123}]}.'
+      )
+    : (
+        "Посмотри на скриншот статистики Avito. " +
+        "Определи, какой показатель выбран на скриншоте: Просмотры, Контакты или Заказы. " +
+        "Верни ТОЛЬКО JSON без пояснений. " +
+        "Если показатель отсутствует на скриншоте, обязательно верни null, а не 0. " +
+        "Формат: " +
+        '{"views":null,"contacts":null,"orders":null}. ' +
+        "views = просмотры, contacts = контакты, orders = заказы. " +
+        "Заполняй числом только тот показатель, который реально показан на скриншоте."
+      );
 const chatData = JSON.stringify({
   model: "GigaChat-2-Pro",
   messages: [
     {
       role: "user",
-     content:
-  "Посмотри на скриншот статистики Avito. " +
-  "Определи, какой показатель выбран на скриншоте: Просмотры, Контакты или Заказы. " +
-  "Верни ТОЛЬКО JSON без пояснений. " +
-  "Если показатель отсутствует на скриншоте, обязательно верни null, а не 0. " +
-  "Формат: " +
-  '{"views":null,"contacts":null,"orders":null}. ' +
-  "views = просмотры, contacts = контакты, orders = заказы. " +
-  "Заполняй числом только тот показатель, который реально показан на скриншоте.",
+     content: prompt,
       attachments: [fileId]
     }
   ],
